@@ -1,55 +1,84 @@
 import React from 'react';
 import './App.css';
+import GifList from './components/GifList';
 
-function App() {
+class App extends React.Component {
 
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [element, setElement] = React.useState(null);
+    constructor(){
+      super();
+      this.state = {
+        isLoading: false,
+        element: null,
+        offset: 0,
+        data: []
+      };
+      this.observer = new IntersectionObserver(this.handleInterSectionCallback,{
+        threshold: 1,
+        rootMargin: '400px'
+      })
+      this.setElement = (elm) =>{
+        this.setState({ element: elm })
+      }
+    }
 
-  const handleInterSectionCallback = (entries, observer) =>{
+
+  componentDidUpdate(){
+    if(this.state.element)
+      this.observer.observe(this.state.element)
+  }
+
+  componentWillUnmount(){
+    if(this.state.element){
+      this.observer.unobserve(this.state.element)
+    }
+  }
+
+  fetchGif = () =>{
+    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=dogs&limit=5&offset=${this.state.offset}&rating=g&lang=en`,{
+      method: 'get',
+    }).then((res) => res.json())
+    .then(res => {
+      const modifiedData = [
+        ...this.state.data,
+        ...res.data
+      ]
+      this.setState({ data: modifiedData, offset: this.state.offset+5 })
+    })
+    .catch((err) => console.log(err))
+  }
+
+  handleInterSectionCallback = (entries, observer) =>{
     entries.forEach(element => {
       if(element.isIntersecting){
-        setIsLoading(true)
+        this.setState({
+          isLoading: true
+        })
+        this.fetchGif()
       } else{
-        setIsLoading(false)
+        this.setState({
+          isLoading: false
+        })
       }
     });
   }
 
-  const observer = new IntersectionObserver(handleInterSectionCallback,{
-    threshold: 1
-  })
 
-
-  React.useEffect(() =>{
-    let elm = element
-    if(elm){
-      observer.observe(elm);
-    }
-
-    return () =>{
-      if(elm){
-        observer.unobserve(elm)
-      }
-    }
-  },[element])
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        Project Infinite Scroll
-      </header>
-      <main className="App-main">
-        <section className="infinite-target">
-          This is the building block and main target element.
-        </section>
-        <div ref={setElement} id="target">
-         second block
-        </div>
-        {isLoading && <div className="loading">'Loading .......'</div>}
-      </main>
-    </div>
-  );
+  render(){
+    return (
+      <div className="App">
+        <header className="App-header">
+          Project Infinite Scroll
+        </header>
+        <main className="App-main">
+          <GifList gifData={this.state.data} />
+          <div ref={this.setElement} id="target">
+            second block
+          </div>
+          {this.state.isLoading && <div className="loading">'Loading .......'</div>}
+        </main>
+      </div>
+    );      
+  }  
 }
 
 export default App;

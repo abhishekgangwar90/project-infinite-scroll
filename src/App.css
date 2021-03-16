@@ -19,11 +19,6 @@
   padding: 0 20%;
 }
 
-.infinite-target {
-  height: 150vh;
-  border: 1px solid black;
-}
-
 .loading {
   position: absolute;
   top: 50%;
