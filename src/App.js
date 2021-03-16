@@ -13,7 +13,7 @@ class App extends React.Component {
         data: []
       };
       this.observer = new IntersectionObserver(this.handleInterSectionCallback,{
-        threshold: 1,
+        threshold:1,
         rootMargin: '400px'
       })
       this.setElement = (elm) =>{
@@ -74,7 +74,7 @@ class App extends React.Component {
           <div ref={this.setElement} id="target">
             second block
           </div>
-          {this.state.isLoading && <div className="loading">'Loading .......'</div>}
+          {/* {this.state.isLoading && <div className="loading">'Loading .......'</div>} */}
         </main>
       </div>
     );      
