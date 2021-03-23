@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import GifList from './components/GifList';
-
+import SearchBar from './components/Search'
 class App extends React.Component {
 
     constructor(){
@@ -22,6 +22,9 @@ class App extends React.Component {
       }
     }
 
+  componentDidMount(){
+    this.fetchRandomGif();
+  }
 
   componentDidUpdate(){
     if(this.state.element)
@@ -34,8 +37,18 @@ class App extends React.Component {
     }
   }
 
+  fetchRandomGif = () =>{
+    return fetch(`https://api.giphy.com/v1/gifs/trending?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&limit=20&offset=${this.state.offset}&rating=g&lang=en`,{
+      method: 'get',
+    }).then((res) => res.json())
+    .then(res => {
+      this.setState({ data: res.data, offset: this.state.offset+5 })
+    })
+    .catch((err) => console.log(err))
+  }
+
   fetchGif = () =>{
-    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=dogs&limit=10&offset=${this.state.offset}&rating=g&lang=en`,{
+    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=${this.state.searchTerm}&limit=10&offset=${this.state.offset}&rating=g&lang=en`,{
       method: 'get',
     }).then((res) => res.json())
     .then(res => {
@@ -54,13 +67,23 @@ class App extends React.Component {
         this.setState({
           isLoading: true
         })
-        this.fetchGif()
+        if(this.state.searchTerm){
+          this.fetchGif()
+        } else{
+          this.fetchRandomGif()
+        }
       } else{
         this.setState({
           isLoading: false
         })
       }
     });
+  }
+
+  onSearchChange = (e) =>{
+    this.setState({
+      searchTerm: e.target.value
+    })
   }
 
 
@@ -71,9 +94,13 @@ class App extends React.Component {
           Project Infinite Scroll
         </header>
         <main className="App-main">
+          <SearchBar onChange={this.onSearchChange} placeholder="Enter the keyword you want the gif for" />
           <GifList gifData={this.state.data} />
+          <section className="No Result">
+            
+          </section>
           <div ref={this.setElement} id="target">
-            second block
+            ...loading
           </div>
           {/* {this.state.isLoading && <div className="loading">'Loading .......'</div>} */}
         </main>
