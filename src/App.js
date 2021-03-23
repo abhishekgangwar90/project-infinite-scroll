@@ -10,7 +10,8 @@ class App extends React.Component {
         isLoading: false,
         element: null,
         offset: 0,
-        data: []
+        data: [],
+        searchTerm: ''
       };
       this.observer = new IntersectionObserver(this.handleInterSectionCallback,{
         threshold:1,
@@ -34,7 +35,7 @@ class App extends React.Component {
   }
 
   fetchGif = () =>{
-    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=dogs&limit=5&offset=${this.state.offset}&rating=g&lang=en`,{
+    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=dogs&limit=10&offset=${this.state.offset}&rating=g&lang=en`,{
       method: 'get',
     }).then((res) => res.json())
     .then(res => {
