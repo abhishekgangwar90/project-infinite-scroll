@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import './gifList.scss';
 
-function GifList({gifData}){
-  console.log(gifData);
-  return <section className="infinite-target">
-            {gifData.map((res) =>{
+class GifList extends PureComponent{
+  render(){
+    return <section className="infinite-target">
+            {this.props.gifData.map((res, index) =>{
               const imageData = res.images.original;
-              return <img className="image" src={imageData.url} alt={res.title} width={imageData.width/1.5} height={imageData.height/1.5} />
+              return <img key={`imageData.hash${index}` } className="image" src={imageData.url} alt={res.title} width={imageData.width/1.5} height={imageData.height/1.5} />
             })
             } 
-        </section>
+    </section>
+  }
 }
 
 export default GifList;

@@ -15,7 +15,7 @@ class App extends React.Component {
       };
       this.observer = new IntersectionObserver(this.handleInterSectionCallback,{
         threshold:1,
-        rootMargin: '400px'
+        rootMargin: '500px'
       })
       this.setElement = (elm) =>{
         this.setState({ element: elm })
@@ -23,7 +23,7 @@ class App extends React.Component {
     }
 
   componentDidMount(){
-    this.fetchRandomGif();
+    this.fetchGif();
   }
 
   componentDidUpdate(){
@@ -37,18 +37,12 @@ class App extends React.Component {
     }
   }
 
-  fetchRandomGif = () =>{
-    return fetch(`https://api.giphy.com/v1/gifs/trending?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&limit=20&offset=${this.state.offset}&rating=g&lang=en`,{
-      method: 'get',
-    }).then((res) => res.json())
-    .then(res => {
-      this.setState({ data: res.data, offset: this.state.offset+5 })
-    })
-    .catch((err) => console.log(err))
-  }
-
   fetchGif = () =>{
-    return this.state.isLoading && fetch(`https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=${this.state.searchTerm}&limit=10&offset=${this.state.offset}&rating=g&lang=en`,{
+    const url = this.state.searchTerm 
+    ? `https://api.giphy.com/v1/gifs/search?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&q=${this.state.searchTerm}&limit=10&offset=${this.state.offset}&rating=g&lang=en` 
+    : `https://api.giphy.com/v1/gifs/trending?api_key=s899G9FtaVFVIXg5LKo1lXgYNdjtwsiO&limit=20&offset=${this.state.offset}&rating=g&lang=en`
+
+    return this.state.isLoading && fetch(url,{
       method: 'get',
     }).then((res) => res.json())
     .then(res => {
@@ -56,7 +50,7 @@ class App extends React.Component {
         ...this.state.data,
         ...res.data
       ]
-      this.setState({ data: modifiedData, offset: this.state.offset+5 })
+      this.setState({ isLoading: false, data: modifiedData, offset: this.state.offset+5 })
     })
     .catch((err) => console.log(err))
   }
@@ -67,11 +61,7 @@ class App extends React.Component {
         this.setState({
           isLoading: true
         })
-        if(this.state.searchTerm){
-          this.fetchGif()
-        } else{
-          this.fetchRandomGif()
-        }
+        this.fetchGif()
       } else{
         this.setState({
           isLoading: false
@@ -80,10 +70,18 @@ class App extends React.Component {
     });
   }
 
-  onSearchChange = (e) =>{
+  onSearchKeyDown = (e) =>{
+   if(e.keyCode === 13 && e.target.value){
+     this.fetchGif();
+     this.setState({
+       isLoading: true,
+       data: []
+     })
+   } else{
     this.setState({
       searchTerm: e.target.value
     })
+   }
   }
 
 
@@ -94,15 +92,17 @@ class App extends React.Component {
           Project Infinite Scroll
         </header>
         <main className="App-main">
-          <SearchBar onChange={this.onSearchChange} placeholder="Enter the keyword you want the gif for" />
+          <SearchBar onKeyDown={this.onSearchKeyDown} placeholder="Enter the keyword you want the gif for" />
           <GifList gifData={this.state.data} />
-          <section className="No Result">
-            
-          </section>
+          {
+            !this.state.isLoading && this.state.data.length === 0 && 
+            <section className="No Result">
+              Could not find any result
+            </section>
+          }
           <div ref={this.setElement} id="target">
-            ...loading
+            {this.state.isLoading && '... Loading more results, Please wait'}
           </div>
-          {/* {this.state.isLoading && <div className="loading">'Loading .......'</div>} */}
         </main>
       </div>
     );      
